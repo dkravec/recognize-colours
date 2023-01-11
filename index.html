@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Colour Recognize - Nova Productions</title>
+        <style scr="style.css" rel="stylesheet" type="text/css"></style>
+        <script src="script.js" defer></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    </head>
+    <body class="target">
+        <img id='testImage' style="display: none;" src=""/>
+        <canvas id='canvas' width="300" height="300" padding="0" style="border:solid;background-image: url(&quot;https://previews.123rf.com/images/stas11/stas111607/stas11160700913/59467034-the-gray-and-white-squares-in-a-checkerboard-pattern-vector.jpg&quot;);background-size: 100px 100px;"></canvas>  
+        <div>
+            <input id="imageFile" name="imageFile" type="file" class="imageFile" accept="image/*"/> 
+            <img src="" id="preview" style="display: none;">
+            <button onclick="getAllColours()">get all colours</button>
+            <div id="colourPreview"></div>
+            <div>
+                <u>Current Trace</u>
+                <p id="currentMouseTrace">x=0, y=0</p>
+                <p id="currentCanvasSize">height=300, height=300</p>
+            </div>
+            <div id="currentColour">
+                <u id="currentColourTitle"></u>
+                <p id="currentColourRGB"></p>
+                <p id="currentColourHEX"></p>
+            </div>
+            <div id="AllColours"></div>
+        </div>
+    </body>
+</html>
