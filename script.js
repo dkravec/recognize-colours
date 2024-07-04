@@ -1,221 +1,218 @@
-dataURL = "";
-currentIMG = false
-doneAllColours = false
-allColours = []
+const images = [
 
-onmousemove = function(e){
-    const xLocation = e.clientX
-    const yLocation = e.clientY
+]
+var imageCount = 0
 
-    trackMouse(xLocation, yLocation)
-}
+document.getElementById('submitFile').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from submitting the traditional way
 
-// updated nov 14 2022
-// document.onload(()=> {
-//     document.getElementById("imageFile").addEventListener(evt =>{
-//         files = evt.target.files;
+    const input = document.getElementById('imageFile');
+    const file = input.files[0];
 
-//         var file = files[0];
+    if (file) {
+        const reader = new FileReader();
+        resetImageData()
 
-//         if (file) {
-//             var reader = new FileReader();
-//             reader.onload = function(e) {
-//                 document.getElementById('preview').src = e.target.result;
-//                 ResizeImage();
-//             };
-//             reader.readAsDataURL(file);
-//         }
-//     })
-// })
-// updated nov 14 2022
+        reader.onload = function(e) {
+            const imageUrl = e.target.result;
+            const imgElement = document.getElementById('preview');
+            // imgElement.src = imageUrl;
+            imgElement.style.display = 'block';
+            
+            // Further processing of the image can be done here
+            console.log('Image successfully uploaded and displayed.');
+            const img = new Image();
 
-$(document).ready(function() {
-    $('#imageFile').change(function(evt) {
-        files = evt.target.files;
+            img.onload = function() {
+                const resizeData = getNewCanvasSize(img.width, img.height);
 
-        var file = files[0];
-
-        if (file) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('preview').src = e.target.result;
-                ResizeImage();
+                const currentImage = imageCount;
+                images.push({
+                    num: currentImage,
+                    img: img,
+                    colours: false,
+                    colourData: [],
+                    resizeData: resizeData
+                });
+                imageCount++;
+                // images[currentImage].resizeData = resizeData;
+                drawCanvas(images[currentImage]);
             };
-            reader.readAsDataURL(file);
-            console.log(file)
-        }
-    });
+
+            img.src = imageUrl;
+        };
+
+        reader.readAsDataURL(file);
+    } else {
+        alert('Please select an image file.');
+    }
 });
 
+function resetImageData() {
+    document.getElementById("processing").innerHTML = ""
+    document.getElementById("AllColours").innerHTML = ""
+    document.getElementById("currentMouseTrace").innerHTML = ""
+    document.getElementById("currentCanvasSize").innerHTML = ""
+    document.getElementById("fullImageSize").innerHTML = ""
+    document.getElementById("currentColour").innerHTML = ""
+}
 
-function ResizeImage() {
-    if (window.File && window.FileReader && window.FileList && window.Blob) {
-        var filesToUploads = document.getElementById('imageFile').files;
-        var file = filesToUploads[0];
-        if (file) {
-            var reader = new FileReader();
-            console.log(reader)
+function drawCanvas(imageData) {
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
 
-            // Set the image once loaded into file reader
-            reader.onload = function(e) {
- 
-                var img = document.createElement("img");
-                img.src = e.target.result;
- 
-                var canvas = document.createElement("canvas");
-                var ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0);
- 
-                var MAX_WIDTH = 300;
-                var MAX_HEIGHT = 300;
-                var width = img.width;
-                var height = img.height
-               
-                var newCanvasWidth = 300
-                var differenceHeightWidthIMG = width / height
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                var newCanvasHeight = newCanvasWidth / differenceHeightWidthIMG
+    document.getElementById("canvas").width=imageData.resizeData.newCanvasWidth
+    document.getElementById("canvas").height=imageData.resizeData.newCanvasHeight
+    ctx = canvas.getContext("2d");
 
-                doneAllColours = false
-                canvas.width = newCanvasWidth;
-                canvas.height = newCanvasHeight;
-                document.getElementById("canvas").width=newCanvasWidth
-                document.getElementById("canvas").height=newCanvasHeight
+    document.getElementById("currentCanvasSize").innerHTML = `Canvas Size: width=${imageData.resizeData.newCanvasWidth}, height=${imageData.resizeData.newCanvasHeight}`
+    document.getElementById("fullImageSize").innerHTML = `width=${imageData.resizeData.imgWidth}, height= ${imageData.resizeData.imgHeight}`
+    // Draw the image on the canvas
+    ctx.drawImage(imageData.img, 0, 0, canvas.width, canvas.height);
+}
 
-                currentIMG = true
+function getNewCanvasSize(width, height) {
+    const OGWidth=width
+    const OGHeight=height
+    var MAX_WIDTH = 300;
+    var MAX_HEIGHT = 300;
 
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
+    var newCanvasWidth = Math.floor(MAX_WIDTH)
+    var differenceHeightWidthIMG = width / height
 
-                canvas.width = width;
-                canvas.height = height;
+    var newCanvasHeight = Math.floor(newCanvasWidth / differenceHeightWidthIMG)
 
-                var ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, width, height);
- 
-                dataurl = canvas.toDataURL(file.type);
-                
-                document.getElementById('preview').src = dataurl;
-
-                
-                setTimeout(function(){ addImage(); }, 1000);
-            }
-            reader.readAsDataURL(file);
+    if (width > height) {
+        if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
         }
     } else {
-        alert('The File APIs are not fully supported in this browser.');
+        if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+        }
     }
+
+    console.log(`width=${width}, height=${height}`)
+    console.log(`newCanvasWidth=${newCanvasWidth}, newCanvasHeight=${newCanvasHeight}`)
+    
+    const resizeData = {
+        width: width,
+        height: height,
+        newCanvasWidth,
+        newCanvasHeight,
+        imgWidth: OGWidth,
+        imgHeight: OGHeight,
+        differenceHeightWidthIMG
+    };
+
+    return resizeData;
 }
 
 function getAllColours() {
-    if (doneAllColours) return
-    document.getElementById("AllColours").innerHTML = ("<u>Please wait...</u>")
+    const AllColours = document.getElementById("AllColours");
+    AllColours.innerHTML = ("<u>Please wait...</u>")
+    const currentImage = images[images.length - 1]
+    if (currentImage.colours) return AllColours.innerHTML = ("<u>colours already found...</u>")
+    if (currentImage.colourData.length > 0) return AllColours.innerHTML = ("<u>colour data found already..</u>")
+    if (currentImage.img === undefined) return AllColours.innerHTML = ("<u>no image data found...</u>")
 
-    doneAllColours = true
-    allColours = []
     var canvas = document.getElementById('canvas');
     var c = canvas.getContext('2d');
 
-    const width = canvas.width
-    const height = canvas.height
+    const allColours = []
+
+    const width = currentImage.resizeData.newCanvasWidth
+    const height = currentImage.resizeData.newCanvasHeight
+
     currentWidth = 0
     currentHeight = 0
 
     for (indexX = 0; indexX < width; indexX++) {
+        console.log(`Processing: ${indexX} / ${width}`)
+
+        if (indexX % 10 === 0 || indexX === width-1) {
+            document.getElementById("processing").innerHTML = `Processing: ${indexX} / ${width}`
+            console.log(`Processing: ${indexX} / ${width}`)
+        }
+
         for (indexY = 0; indexY < height; indexY++) {
             var p = c.getImageData(indexX, indexY, 1, 1).data; 
+            const SCALING = 10;
             const data = {
-                "r" : p[0],
-                "g" : p[1],
-                "b" : p[2],
+                "r" : Math.floor(p[0] / SCALING) * SCALING,
+                "g" : Math.floor(p[1] / SCALING) * SCALING,
+                "b" : Math.floor(p[2] / SCALING) * SCALING,
                 "x" : indexX,
                 "y" : indexY
             }
-            console.log(data)
-            //allColours.push(data)
+
+            allColours.push(data)
         }
     }
 
+    const uniqueColours = [];
+    const colorSet = new Set();
+
+    // Remove duplicate colours
+    allColours.forEach(color => {
+        const colorString = `${color.r},${color.g},${color.b}`;
+        if (!colorSet.has(colorString)) {
+            colorSet.add(colorString);
+            uniqueColours.push(color);
+        }
+    });
+
+    const amountColours = uniqueColours.length;
+    var currentColour=0;
+    var str = ""
+    
+    uniqueColours.map(function(colour) {
+        currentColour++
+        if (currentColour % 10 === 0 || currentColour === amountColours) {
+            document.getElementById("processing").innerHTML = `Processing: ${currentColour} / ${amountColours}`
+            console.log(`Processing: ${currentColour} / ${amountColours}`)
+        }
+
+        str+=`
+            <li class="colour">
+                <p style="color: rgb(${colour.r}, ${colour.g}, ${colour.b})">rgb(${colour.r}, ${colour.g}, ${colour.b})</p>
+            </li>
+        `
+    });
+
     document.getElementById("AllColours").innerHTML = `
-        <u>Found Total of ${allColours.length} Colours</u>
-        <ul class="all-colours">
-            ${allColours.map(function(colour) {
-                return `
-                    <li class="colour">
-                        <p>rgb(${colour.r}, ${colour.g}, ${colour.b}) x value: ${colour.x}, y value: ${colour.y}</p>
-                    </li>
-                `
-            }).join(" ")}
-        </ul>
+        <u>Found Total of ${uniqueColours.length} Unique Colours</u>
+        <ul class="all-colours">${str}</ul>
     `
 }
 
-canvas = document.getElementById('canvas');
-ctx = canvas.getContext('2d'); 
-img = document.getElementById('testImage'); 
-ctx.drawImage(img, 0, 0);
-imageData = ctx.getImageData(0, 0, canvas.width, 300);
-data = imageData.data;
-
-function addImage(){
-    document.getElementById('testImage').src= dataurl;
-    if (dataURL == ""){
-        doneAllColours = false
-
-        canvas = document.getElementById('canvas');
-        ctx = canvas.getContext('2d'); 
-        img = document.getElementById('testImage'); 
-        ctx.drawImage(img, 0, 0);
-        imageData = ctx.getImageData(0, 0, canvas.width, 300);
-        data = imageData.data; 
-
-    } else{
-        canvas=document.getElementById("canvas");
-        ctx=canvas.getContext("2d");
-        img = document.getElementById('testImage'); 
-        elementImg = document.getElementById("newImg");
-
-        imgHight = elementImg.clientHeight;   
-        imgWidth = elementImg.clientWidth;   
-        
-        ctx.drawImage(img,0,0,img.width,img.height,0,0,imgWidth,imgHight);
-        dataURL="";
-    }
-
-    imageData = ctx.getImageData(0, 0, canvas.width, 300);
-    data = imageData.data;
-}
-
-colorList=[]
-newColor=0;
-
-function trackMouse(x, y){
+canvas.addEventListener('mousemove', function(event) {
+    // You can add code here to handle mouse move over the canvas
     var canvas = document.getElementById('canvas');
     var c = canvas.getContext('2d');
+
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor(event.clientX - rect.left);
+    const y = Math.floor(event.clientY - rect.top);
+
     var p = c.getImageData(x, y, 1, 1).data; 
+
     document.getElementById("currentMouseTrace").innerHTML = `Mouse Tracking: x=${x}, y=${y}` 
-    document.getElementById("currentCanvasSize").innerHTML = `Canvas Size: width=${canvas.width}, height=${canvas.height}}`
-    canvasData = document.getElementById("canvas");
-
-
-    if (x > canvasData.width) return resetCurrentColour()
-    if (y > canvasData.height) return resetCurrentColour()
-    
-    img = document.getElementById('img'); 
-
-    newColor=0;
+    document.getElementById("currentCanvasSize").innerHTML = `Canvas Size: width=${canvas.width}, height=${canvas.height}`
 
     changeBackground(p[0], p[1], p[2])
-}
+
+    // console.log('Mouse Move:', x, y);
+});
+
+canvas.addEventListener('mouseleave', function(event) {
+    // console.log('Mouse Leave');
+    return resetCurrentColour()
+});
 
 function changeBackground(r, g, b){
     const currentColor = `rgb(${r}, ${g}, ${b})`;
@@ -234,7 +231,6 @@ function changeBackground(r, g, b){
         <p>${colourHex}</p>
     `
 }
-
 function resetCurrentColour() {
     var colourPreview = document.getElementById('colourPreview')
 
@@ -254,87 +250,3 @@ function convertColourRGBtoHEX(red,green,blue) {
 
     return '#' + (0x1000000 + rgb).toString(16).slice(1);
 }
-
-
-  
-function clickMe(){
-    elementImg = document.getElementById("fullBody");
-    elementImg.innerHTML = "<img id='newImg' src='"+dataURL+"' class='newImg'>"
-    dataurl=dataURL;
-
-    setTimeout(function(){ addImage(); }, 1000);
-}
-
-(function ($) {
-    var defaults;
-    $.event.fix = function (originalFix) {
-        return function (event) {
-        event = originalFix.apply(this, arguments);
-        if (event.type.indexOf("copy") === 0 || event.type.indexOf("paste") === 0) {
-            event.clipboardData = event.originalEvent.clipboardData;
-        }
-        return event;
-        };
-    }($.event.fix);
-
-    defaults = {
-        callback: $.noop,
-        matchType: /image.*/ 
-    };
-
-    return $.fn.pasteImageReader = function (options) {
-
-        if (typeof options === "function") {
-        options = {
-            callback: options };
-
-        }
-        options = $.extend({}, defaults, options);
-
-        return this.each(function () {
-            var $this, element;
-            element = this;
-            $this = $(this);
-            return $this.bind("paste", function (event) {
-                var clipboardData, found;
-                found = false;
-                clipboardData = event.clipboardData;
-                
-                return Array.prototype.forEach.call(clipboardData.types, function (type, i) {
-                    var file, reader;
-                    if (found) {
-                        return;
-                    }
-                    if (
-                    type.match(options.matchType) ||
-                    clipboardData.items[i].type.match(options.matchType))
-                    {
-                        file = clipboardData.items[i].getAsFile();
-                        reader = new FileReader();
-                        reader.onload = function (evt) {
-                        return options.callback.call(element, {
-                            dataURL: evt.target.result,
-                            event: evt,
-                            file: file,
-                            name: file.name });
-
-                        };
-                        reader.readAsDataURL(file);
-                    
-                        return found = true;
-                    }
-                });
-            });
-        });
-    }; 
-    
-})(jQuery);
-
-var dataURL, filename;
-
-$("html").pasteImageReader(function (results) {
-    filename = results.filename, dataURL = results.dataURL;
-    var img = document.createElement("img");
-    img.src = dataURL;
-    clickMe(); 
-});
