@@ -3,20 +3,27 @@
     <head>
         <meta charset="UTF-8">
         <title>Colour Recognize - Nova Productions</title>
-        <style scr="style.css" rel="stylesheet" type="text/css"></style>
+        <link rel="stylesheet" type="text/css" href="./style.css">
         <script src="script.js" defer></script>
     </head>
-    <body class="body">
+    <body>
+        <div class="header">
+            <h1>Colour Recognize</h1>
+            <p>Created by Daniel Kravec, with <a target="_blank" href="https://novapro.net">Nova Productions</a><br>Version 2.1b1 (3.2024.12.09) - Started July 8th, 2021</p>
+        </div>
         <form id="submitFile">
-            <label for="imageFile">Upload an image:</label>
+            <label for="imageFile">Select an image:</label>
             <input id="imageFile" name="imageFile" type="file" class="imageFile" accept="image/*"/> 
             <button type="submit">Submit</button>
         </form>
         <img id='testImage' style="display: none;" src=""/>
         <canvas id='canvas' width="300" height="300" padding="0" style="border:solid;background-image: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fimages%2Fthe-gray-and-white-squares-in-a-checkerboard-pattern-vector%2F109935339&psig=AOvVaw0UHKlvi98ibuY-Kh_MAbQ1&ust=1720131542448000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJD02r7zi4cDFQAAAAAdAAAAABAE');background-size: 100px 100px;"></canvas>  
-        <div>
+        <canvas style='display: none;', id='canvasLarge' width="300" height="300" padding="0" style="border:solid;background-image: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fimages%2Fthe-gray-and-white-squares-in-a-checkerboard-pattern-vector%2F109935339&psig=AOvVaw0UHKlvi98ibuY-Kh_MAbQ1&ust=1720131542448000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJD02r7zi4cDFQAAAAAdAAAAABAE');background-size: 100px 100px;"></canvas>  
+        <div class="mainArea">
             <img src="" id="preview" style="display: none;">
             <button onclick="getAllColours()">get all colours</button>
+            <button onclick="findObjects(true)">find changes (full)</button>
+            <button onclick="findObjects(false)">find changes (scaled)</button>
             <div id="colourPreview"></div>
             <div>
                 <u>Current Trace</u>

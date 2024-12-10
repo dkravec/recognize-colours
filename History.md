@@ -1,5 +1,12 @@
 # Version History
 
+### 2.1b1 (3.2024.12.09)
+- Started feature to find changes of the pixel colours
+- For future, could be able to find objects (edge detection)
+- Updated styles, theme is in line with other sites
+    - New background colour, new font, new buttons, better padding
+- Added header to website.
+
 ### 2.0 (2024.07.03)
 - Rewrote entire codebase
 - Was going to make an edge decection site, but decided to remake this site as a first step.
